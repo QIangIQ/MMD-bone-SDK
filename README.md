@@ -1,6 +1,32 @@
-# mmd-bone-tools
+<p align="center"><img src="https://raw.githubusercontent.com/QIangIQ/MMD-bone-SDK/main/assets/icon.png" width="96" alt="MMD Bone Tools icon"></p>
 
-Command line tools and a Python library for the boring parts of MMD rigging:
+<h1 align="center">MMD Bone Tools (MMDボーンツール)</h1>
+
+<p align="center">
+<b>Translate Japanese MMD bone names to English, map bones between MMD, Blender, Unity, VRM and Mixamo, and retarget VMD motions to any model.</b><br>
+MMDのボーン名を日本語から英語へ自動翻訳・変換し、VMDモーションを他のモデルへリターゲットする無料ツール
+</p>
+
+<p align="center">
+<a href="https://github.com/QIangIQ/MMD-bone-SDK/releases/latest"><img alt="Download" src="https://img.shields.io/github/v/release/QIangIQ/MMD-bone-SDK?label=download&color=ff7a8c"></a>
+<a href="https://github.com/QIangIQ/MMD-bone-SDK/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/QIangIQ/MMD-bone-SDK/actions/workflows/ci.yml/badge.svg"></a>
+<img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-blue">
+<img alt="MIT license" src="https://img.shields.io/badge/license-MIT-green">
+<a href="https://github.com/QIangIQ/MMD-bone-SDK/blob/main/README.ja.md"><img alt="日本語" src="https://img.shields.io/badge/README-日本語-red"></a>
+</p>
+
+**Download:** [Windows app (no install)](https://github.com/QIangIQ/MMD-bone-SDK/releases/latest) ·
+`pip install mmd-bone-tools` · [Website](https://qiangiq.github.io/MMD-bone-SDK/) · [日本語の説明](https://github.com/QIangIQ/MMD-bone-SDK/blob/main/README.ja.md)
+
+![MMD Bone Tools desktop app](https://raw.githubusercontent.com/QIangIQ/MMD-bone-SDK/main/assets/screenshot.png)
+
+MMD Bone Tools is a free, open-source MikuMikuDance (MMD) rigging toolkit. It
+renames bones in **PMX** and **PMD** models and **VMD** motion files so that
+Japanese models, English models, Blender (mmd_tools), Unity Humanoid, VRM and
+Mixamo rigs can share motions. Use the desktop app, the `mmdbt` command line or
+the Python library.
+
+Tools for the boring parts of MMD rigging:
 translating Japanese bone names, mapping bones between naming conventions and
 making downloaded motions fit the model you want to use them on.
 
@@ -10,10 +36,26 @@ for byte except for the names you change.
 
 ## Install
 
-```sh
-pip install -e .          # from a checkout; installs the `mmdbt` command
-python -m mmd_bone_tools  # same thing without installing the script
-```
+* **Windows app**: download `MMDBoneTools-…-windows-x64.zip` from the
+  [latest release](https://github.com/QIangIQ/MMD-bone-SDK/releases/latest),
+  unzip, run `MMDBoneTools.exe`. No Python needed. Drop files onto the exe to
+  load them. Windows SmartScreen may warn because the exe is not code-signed:
+  choose "More info", then "Run anyway".
+* **Python (any OS)**: `pip install mmd-bone-tools`, then `mmdbt-gui` for the
+  app or `mmdbt` for the command line.
+* **From source**: `pip install -e .` in a checkout.
+
+## Desktop app
+
+Four tabs, labelled in English and Japanese:
+
+* **Translate / 翻訳**: add files, folders or zip downloads and translate every
+  PMX, PMD and VMD inside them.
+* **Convert / 変換**: rename a model's or motion's bones to another convention.
+* **Retarget / リターゲット**: make a motion fit a model, optionally with
+  rest-pose correction from the original model.
+* **Bone lookup / ボーン検索**: type any bone name and see it in every
+  convention.
 
 ## What it does
 
@@ -28,6 +70,7 @@ python -m mmd_bone_tools  # same thing without installing the script
 | `mmdbt table` | The whole standard bone table as CSV |
 | `mmdbt unpack DL.zip` | Extract an MMD download with its Shift-JIS file names intact |
 | `mmdbt batch FOLDER` | Translate every PMX/PMD/VMD in a folder, zips included |
+| `mmdbt gui` | Open the desktop app |
 
 ### Translate a download
 
@@ -129,13 +172,47 @@ save_vmd(motion, "dance_for_miku_en.vmd")
 ```sh
 python -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/pytest
-.venv/bin/ruff check src tests
+.venv/bin/ruff check src tests packaging
+pip install -e ".[exe]" && python packaging/build.py   # standalone executables
 ```
+
+Pushing a `v*` tag runs `.github/workflows/release.yml`, which tests, builds the
+wheel, sdist and Windows/Linux executables, and publishes a GitHub release.
 
 Tests build PMX/PMD/VMD files byte by byte in `tests/builders.py` and check
 that every codec round-trips exactly, plus forward kinematics checks for the
 rest-pose retargeting. The codecs were also checked against the sample PMD
 and VMD files that ship with three.js (byte-identical round trips).
+
+## FAQ
+
+**How do I translate MMD bone names from Japanese to English?**
+Open the app, add the model (`.pmx`/`.pmd`) or motion (`.vmd`) and press
+Translate. On the command line: `mmdbt translate model.pmx --rename`.
+
+**Why doesn't my VMD motion move my model?**
+MMD applies motions by bone name. If the motion uses Japanese names (`左腕`)
+and the model uses English ones (`arm_L`), nothing moves. Run
+`mmdbt retarget motion.vmd --model model.pmx` to rename the motion's tracks to
+the model's bones.
+
+**How do I use MMD motions in Blender, Unity, VRChat or with Mixamo rigs?**
+`mmdbt convert model.pmx --to blender` (or `unity`, `vrm`, `mixamo`) renames the
+bones; `mmdbt map model.pmx --to unity` exports a bone map you can paste into
+an avatar setup or script.
+
+**What is the English name of 上半身 / 下半身 / センター / 足ＩＫ?**
+`upper body`, `lower body`, `center`, `leg IK_L`/`leg IK_R`. Run
+`mmdbt table` for all 110 standard bones in every convention, or `mmdbt lookup
+<name>`.
+
+**My download's file names are garbled (文字化け).**
+`mmdbt unpack download.zip` extracts Japanese zips with their Shift-JIS names
+decoded correctly.
+
+**Does it change anything besides names?**
+No. Files are written back byte for byte except for the names (and, when you
+retarget with a source model, the corrected keyframes).
 
 ## Sources and licensing
 
@@ -144,3 +221,10 @@ and VMD and the published bone lists of Unity `HumanBodyBones`, VRM 1.0 and
 Mixamo. No code or dictionaries were copied from other tools. MIT licensed.
 Model and motion files you process keep their own licenses; check them before
 redistributing anything you converted.
+
+## Keywords
+
+MMD, MikuMikuDance, PMX, PMD, VMD, PMXEditor, bone names, bone translation,
+Japanese to English, ボーン名, 英語化, 翻訳, rigging, retargeting, motion
+retarget, A-pose to T-pose, Blender mmd_tools, Unity Humanoid, VRM, VRChat,
+Mixamo.

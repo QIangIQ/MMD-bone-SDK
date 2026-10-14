@@ -4,18 +4,54 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mmd-bone-tools"
-version = "0.1.0"
-description = "Translate, map and retarget MMD bones (PMX, PMD, VMD) between Japanese, English, Blender, Unity, VRM and Mixamo naming"
+dynamic = ["version"]
+description = "Translate Japanese MMD bone names to English, map bones between MMD, Blender, Unity Humanoid, VRM and Mixamo, and retarget VMD motions (PMX, PMD, VMD)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 dependencies = []
+authors = [{ name = "QIangIQ" }]
+keywords = [
+    "mmd", "mikumikudance", "pmx", "pmd", "vmd", "bone", "bones", "rigging", "retarget",
+    "retargeting", "motion", "animation", "japanese", "translation", "bone-names", "blender",
+    "unity", "humanoid", "vrm", "mixamo", "mmd-tools", "3d",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: X11 Applications",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Natural Language :: Japanese",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+    "Topic :: Multimedia :: Graphics :: 3D Rendering",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://qiangiq.github.io/MMD-bone-SDK/"
+Source = "https://github.com/QIangIQ/MMD-bone-SDK"
+Download = "https://github.com/QIangIQ/MMD-bone-SDK/releases/latest"
+Issues = "https://github.com/QIangIQ/MMD-bone-SDK/issues"
+Changelog = "https://github.com/QIangIQ/MMD-bone-SDK/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["pytest>=7", "ruff>=0.5"]
+dev = ["pytest>=7", "ruff>=0.5", "build>=1", "twine>=5"]
+exe = ["pyinstaller>=6"]
 
 [project.scripts]
 mmdbt = "mmd_bone_tools.cli:main"
+
+[project.gui-scripts]
+mmdbt-gui = "mmd_bone_tools.gui:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "mmd_bone_tools.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -34,3 +70,4 @@ ignore = ["E731", "B905"]
 [tool.ruff.lint.per-file-ignores]
 "src/mmd_bone_tools/dictionary.py" = ["E501"]
 "tests/builders.py" = ["E501"]
+"tools/build_docs.py" = ["E501"]

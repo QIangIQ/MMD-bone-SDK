@@ -14,7 +14,7 @@ from .ops import (
 from .translate import translate_bone, translate_morph
 from .vmd import load_vmd, save_vmd
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "BONES", "CONVENTIONS", "convert", "detect_convention", "lookup", "load_model",

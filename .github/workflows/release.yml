@@ -1,0 +1,115 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: ruff check src tests packaging tools
+      - run: pytest -q
+
+  dist:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - run: python -m build
+      - run: twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  exe:
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows-x64
+          - os: ubuntu-latest
+            label: linux-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[exe]"
+      - run: python packaging/build.py
+      - name: Smoke test
+        shell: bash
+        run: ./dist/mmdbt --version && ./dist/mmdbt lookup 左腕
+      - name: Package
+        shell: bash
+        run: |
+          version=$(python -c "import mmd_bone_tools; print(mmd_bone_tools.__version__)")
+          name="MMDBoneTools-${version}-${{ matrix.label }}"
+          mkdir "$name"
+          cp dist/* README.md README.ja.md LICENSE CHANGELOG.md "$name/"
+          python -c "import shutil,sys; shutil.make_archive(sys.argv[1], 'zip', '.', sys.argv[1])" "$name"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exe-${{ matrix.label }}
+          path: MMDBoneTools-*.zip
+
+  release:
+    needs: [dist, exe]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Release notes from CHANGELOG
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '/^## /{p = index($0, "## " v " ") == 1; next} p' CHANGELOG.md > notes.md
+          cat >> notes.md <<'MD'
+
+          ### Downloads
+          - **Windows**: `MMDBoneTools-*-windows-x64.zip`, unzip and run `MMDBoneTools.exe` (desktop app) or `mmdbt.exe` (command line). No Python needed.
+          - **Linux**: `MMDBoneTools-*-linux-x64.zip`.
+          - **Any OS with Python 3.10+**: `pip install mmd-bone-tools`, or install the `.whl` below.
+
+          Windows may show a SmartScreen warning because the executables are not code-signed: choose "More info", then "Run anyway".
+          MD
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: MMD Bone Tools ${{ github.ref_name }}
+          body_path: notes.md
+          files: artifacts/*
+
+  pypi:
+    # Turn on once PyPI trusted publishing is set up: repository variable PYPI_PUBLISH=true
+    needs: [dist, exe]
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PYPI_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

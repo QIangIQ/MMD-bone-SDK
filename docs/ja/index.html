@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MMDボーンツール｜MMDのボーン名を日本語から英語へ自動翻訳・VMDモーションのリターゲット</title>
+<meta name="description" content="PMX・PMD・VMDのボーン名を日本語から英語へ自動翻訳し、Blender・Unity Humanoid・VRM・Mixamo のボーン名へ変換、VMDモーションを別のモデルへリターゲットできる無料ツール。Windowsアプリ・コマンド・Pythonライブラリ。">
+<meta name="keywords" content="MMD, MikuMikuDance, PMX, PMD, VMD, bone, ボーン名, 英語化, 翻訳, retarget, リターゲット, Blender, Unity, VRM, VRChat, Mixamo">
+<link rel="canonical" href="https://qiangiq.github.io/MMD-bone-SDK/ja/">
+<link rel="alternate" hreflang="ja" href="https://qiangiq.github.io/MMD-bone-SDK/ja/">
+<link rel="alternate" hreflang="en" href="https://qiangiq.github.io/MMD-bone-SDK/">
+<link rel="alternate" hreflang="x-default" href="https://qiangiq.github.io/MMD-bone-SDK/">
+<link rel="icon" href="../icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MMDボーンツール｜MMDのボーン名を日本語から英語へ自動翻訳・VMDモーションのリターゲット">
+<meta property="og:description" content="PMX・PMD・VMDのボーン名を日本語から英語へ自動翻訳し、Blender・Unity Humanoid・VRM・Mixamo のボーン名へ変換、VMDモーションを別のモデルへリターゲットできる無料ツール。Windowsアプリ・コマンド・Pythonライブラリ。">
+<meta property="og:url" content="https://qiangiq.github.io/MMD-bone-SDK/ja/">
+<meta property="og:image" content="https://qiangiq.github.io/MMD-bone-SDK/social-preview.png">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MMDボーンツール｜MMDのボーン名を日本語から英語へ自動翻訳・VMDモーションのリターゲット">
+<meta name="twitter:description" content="PMX・PMD・VMDのボーン名を日本語から英語へ自動翻訳し、Blender・Unity Humanoid・VRM・Mixamo のボーン名へ変換、VMDモーションを別のモデルへリターゲットできる無料ツール。Windowsアプリ・コマンド・Pythonライブラリ。">
+<meta name="twitter:image" content="https://qiangiq.github.io/MMD-bone-SDK/social-preview.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "MMD Bone Tools", "alternateName": "MMDボーンツール", "applicationCategory": "MultimediaApplication", "operatingSystem": "Windows, macOS, Linux", "softwareVersion": "1.0.0", "datePublished": "2026-10-14", "description": "PMX・PMD・VMDのボーン名を日本語から英語へ自動翻訳し、Blender・Unity Humanoid・VRM・Mixamo のボーン名へ変換、VMDモーションを別のモデルへリターゲットできる無料ツール。Windowsアプリ・コマンド・Pythonライブラリ。", "url": "https://qiangiq.github.io/MMD-bone-SDK/ja/", "downloadUrl": "https://github.com/QIangIQ/MMD-bone-SDK/releases/latest", "codeRepository": "https://github.com/QIangIQ/MMD-bone-SDK", "license": "https://opensource.org/licenses/MIT", "image": "https://qiangiq.github.io/MMD-bone-SDK/social-preview.png", "inLanguage": ["en", "ja"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "keywords": "MMD, MikuMikuDance, PMX, PMD, VMD, bone names, translate, Japanese, English, retarget, Blender, Unity, VRM, Mixamo, ボーン名, 英語化"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "MMDのボーン名を日本語から英語に変換するには？", "acceptedAnswer": {"@type": "Answer", "text": "MMDボーンツールで .pmx / .pmd / .vmd を追加して「翻訳する」を押します。コマンドでは mmdbt translate モデル.pmx --rename です。"}}, {"@type": "Question", "name": "モーションを読み込んでもモデルが動かないのはなぜ？", "acceptedAnswer": {"@type": "Answer", "text": "MMDはボーン名でモーションを適用します。日本語名（左腕）のモーションは英語名（arm_L）のモデルを動かせません。mmdbt retarget モーション.vmd --model モデル.pmx で合わせられます。"}}, {"@type": "Question", "name": "MMDモデルやモーションを Blender・Unity・VRChat・Mixamo で使うには？", "acceptedAnswer": {"@type": "Answer", "text": "mmdbt convert モデル.pmx --to blender（unity / vrm / mixamo）でボーン名を変換するか、mmdbt map モデル.pmx --to unity で対応表を書き出します。"}}, {"@type": "Question", "name": "センター・上半身・下半身・足ＩＫの英語名は？", "acceptedAnswer": {"@type": "Answer", "text": "center、upper body、lower body、leg IK_L / leg IK_R です。下の対応表をご覧ください。"}}, {"@type": "Question", "name": "無料ですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。MITライセンスのオープンソースです。"}}]}</script>
+<style>
+:root{--bg:#f7f7fa;--fg:#1b1f2a;--mut:#5b6374;--card:#fff;--line:#e2e4ea;--acc:#e0485f;--accfg:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#181c28;--fg:#eceff4;--mut:#aab3c5;--card:#212636;--line:#323a4f;--acc:#ff7a8c;--accfg:#181c28}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:24px 0}
+header img{width:88px;height:88px}
+h1{font-size:2.2rem;margin:0;line-height:1.2}h2{margin-top:2.4em;font-size:1.5rem}
+.tag{font-size:1.15rem;color:var(--mut);margin:.4em 0 0}
+.lang{margin-left:auto;align-self:flex-start}
+a{color:var(--acc)}
+.btns{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0 4px}
+.btn{display:inline-block;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600;border:1px solid var(--acc)}
+.btn.primary{background:var(--acc);color:var(--accfg)}
+.small{color:var(--mut);font-size:.92rem}
+.shot{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);margin-top:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h3{margin:0 0 6px;font-size:1.05rem}.card p{margin:0;color:var(--mut)}
+p code{overflow-wrap:anywhere}
+pre,code{font-family:ui-monospace,Consolas,"Cascadia Mono",monospace}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem;background:var(--card)}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--card)}
+footer{margin-top:48px;color:var(--mut);font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+<header>
+<img src="../icon.png" alt="" width="88" height="88">
+<div><h1>MMDボーンツール</h1><p class="tag">MMDのボーン名を日本語から英語へ翻訳し、Blender・Unity・VRM・Mixamo と相互変換。どのVMDモーションもどのモデルにも合わせられます。</p></div>
+<a class="lang" href="https://qiangiq.github.io/MMD-bone-SDK/" hreflang="en">English</a>
+</header>
+<div class="btns">
+<a class="btn primary" href="https://github.com/QIangIQ/MMD-bone-SDK/releases/latest">Windows版をダウンロード</a>
+<a class="btn" href="https://github.com/QIangIQ/MMD-bone-SDK">GitHubでソースを見る</a>
+</div>
+<p class="small">無料・オープンソース（MIT）· バージョン 1.0.0 · インストール不要 · Python 3.10以上がある環境: <code>pip install mmd-bone-tools</code></p>
+<img class="shot" src="../screenshot.png" alt="MMD Bone Tools / MMDボーンツール" width="892" height="530">
+<h2>できること</h2>
+<div class="grid"><div class="card"><h3>ボーン名の英語化</h3><p>PMX/PMD/VMDのボーン名・モーフ名・材質名・表示枠・剛体・ジョイント名を英語に翻訳。左腕 → arm_L、右スカート前２ → skirt_front2_R。</p></div><div class="card"><h3>命名規則の相互変換</h3><p>日本語MMD・英語MMD・Blender（arm.L）・Unity Humanoid・VRM 1.0・Mixamo の間で準標準ボーン110本を変換。</p></div><div class="card"><h3>モーションのリターゲット</h3><p>VMDのボーン名をモデルに合わせ、Aポーズ⇔Tポーズなど初期姿勢の違いを補正。移動量も自動調整。</p></div><div class="card"><h3>一括処理・zip展開</h3><p>フォルダごとまとめて翻訳。日本語ファイル名のzipも文字化けせずに展開。</p></div><div class="card"><h3>データは名前だけ変更</h3><p>名前以外はバイト単位でそのまま保存。長い名前はVMDの15バイト制限に合わせて短縮。</p></div><div class="card"><h3>アプリ・コマンド・ライブラリ</h3><p>日英表示のデスクトップアプリ、mmdbt コマンド、Python API。</p></div></div>
+<h2>使い方</h2>
+<ol><li>最新リリースから Windows 用 zip をダウンロードして展開します。</li><li>MMDBoneTools.exe を起動するか、.pmx/.pmd/.vmd ファイルをドラッグ＆ドロップします。</li><li>「翻訳」「変換」「リターゲット」を選んでボタンを押します。結果は元ファイルの隣に _en 付きで保存されます。</li></ol>
+<h2>コマンドライン</h2>
+<pre><code>mmdbt translate model.pmx --rename
+mmdbt translate dance.vmd
+mmdbt retarget dance.vmd --model model_en.pmx
+mmdbt convert model.pmx --to unity
+mmdbt lookup 上半身2
+mmdbt unpack download.zip
+mmdbt batch ~/Downloads/mmd</code></pre>
+<h2>よくある質問</h2>
+<details><summary>MMDのボーン名を日本語から英語に変換するには？</summary><p>MMDボーンツールで .pmx / .pmd / .vmd を追加して「翻訳する」を押します。コマンドでは mmdbt translate モデル.pmx --rename です。</p></details><details><summary>モーションを読み込んでもモデルが動かないのはなぜ？</summary><p>MMDはボーン名でモーションを適用します。日本語名（左腕）のモーションは英語名（arm_L）のモデルを動かせません。mmdbt retarget モーション.vmd --model モデル.pmx で合わせられます。</p></details><details><summary>MMDモデルやモーションを Blender・Unity・VRChat・Mixamo で使うには？</summary><p>mmdbt convert モデル.pmx --to blender（unity / vrm / mixamo）でボーン名を変換するか、mmdbt map モデル.pmx --to unity で対応表を書き出します。</p></details><details><summary>センター・上半身・下半身・足ＩＫの英語名は？</summary><p>center、upper body、lower body、leg IK_L / leg IK_R です。下の対応表をご覧ください。</p></details><details><summary>無料ですか？</summary><p>はい。MITライセンスのオープンソースです。</p></details>
+<h2 id="bones">MMDボーン名 対応表</h2>
+<p>準標準ボーンの各命名規則での名前（左側のみ表示。右側は 右 / _R / .R / Right）。</p>
+<div class="tablewrap"><table><thead><tr><th>Japanese MMD</th><th>English MMD</th><th>Blender</th><th>Unity Humanoid</th><th>VRM 1.0</th><th>Mixamo</th></tr></thead><tbody><tr><td>全ての親</td><td>master</td><td>master</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>センター</td><td>center</td><td>center</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>グルーブ</td><td>groove</td><td>groove</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>腰</td><td>waist</td><td>waist</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>下半身</td><td>lower body</td><td>lower_body</td><td>Hips</td><td>hips</td><td>mixamorig:Hips</td></tr>
+<tr><td>上半身</td><td>upper body</td><td>upper_body</td><td>Spine</td><td>spine</td><td>mixamorig:Spine</td></tr>
+<tr><td>上半身2</td><td>upper body2</td><td>upper_body2</td><td>Chest</td><td>chest</td><td>mixamorig:Spine1</td></tr>
+<tr><td>上半身3</td><td>upper body3</td><td>upper_body3</td><td>UpperChest</td><td>upperChest</td><td>mixamorig:Spine2</td></tr>
+<tr><td>首</td><td>neck</td><td>neck</td><td>Neck</td><td>neck</td><td>mixamorig:Neck</td></tr>
+<tr><td>頭</td><td>head</td><td>head</td><td>Head</td><td>head</td><td>mixamorig:Head</td></tr>
+<tr><td>頭先</td><td>head tip</td><td>head_tip</td><td>–</td><td>–</td><td>mixamorig:HeadTop_End</td></tr>
+<tr><td>両目</td><td>eyes</td><td>eyes</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左目</td><td>eye_L</td><td>eye.L</td><td>LeftEye</td><td>leftEye</td><td>mixamorig:LeftEye</td></tr>
+<tr><td>あご</td><td>jaw</td><td>jaw</td><td>Jaw</td><td>jaw</td><td>–</td></tr>
+<tr><td>舌</td><td>tongue</td><td>tongue</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>腰キャンセル左</td><td>waist cancel_L</td><td>waist_cancel.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左肩P</td><td>shoulderP_L</td><td>shoulderP.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左肩</td><td>shoulder_L</td><td>shoulder.L</td><td>LeftShoulder</td><td>leftShoulder</td><td>mixamorig:LeftShoulder</td></tr>
+<tr><td>左肩C</td><td>shoulderC_L</td><td>shoulderC.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左腕</td><td>arm_L</td><td>arm.L</td><td>LeftUpperArm</td><td>leftUpperArm</td><td>mixamorig:LeftArm</td></tr>
+<tr><td>左腕捩</td><td>arm twist_L</td><td>arm_twist.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左腕捩1</td><td>arm twist1_L</td><td>arm_twist1.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左腕捩2</td><td>arm twist2_L</td><td>arm_twist2.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左腕捩3</td><td>arm twist3_L</td><td>arm_twist3.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左ひじ</td><td>elbow_L</td><td>elbow.L</td><td>LeftLowerArm</td><td>leftLowerArm</td><td>mixamorig:LeftForeArm</td></tr>
+<tr><td>左手捩</td><td>wrist twist_L</td><td>wrist_twist.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左手捩1</td><td>wrist twist1_L</td><td>wrist_twist1.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左手捩2</td><td>wrist twist2_L</td><td>wrist_twist2.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左手捩3</td><td>wrist twist3_L</td><td>wrist_twist3.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左手首</td><td>wrist_L</td><td>wrist.L</td><td>LeftHand</td><td>leftHand</td><td>mixamorig:LeftHand</td></tr>
+<tr><td>左ダミー</td><td>dummy_L</td><td>dummy.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左親指０</td><td>thumb0_L</td><td>thumb0.L</td><td>LeftThumbProximal</td><td>leftThumbMetacarpal</td><td>mixamorig:LeftHandThumb1</td></tr>
+<tr><td>左親指１</td><td>thumb1_L</td><td>thumb1.L</td><td>LeftThumbIntermediate</td><td>leftThumbProximal</td><td>mixamorig:LeftHandThumb2</td></tr>
+<tr><td>左親指２</td><td>thumb2_L</td><td>thumb2.L</td><td>LeftThumbDistal</td><td>leftThumbDistal</td><td>mixamorig:LeftHandThumb3</td></tr>
+<tr><td>左親指先</td><td>thumb tip_L</td><td>thumb_tip.L</td><td>–</td><td>–</td><td>mixamorig:LeftHandThumb4</td></tr>
+<tr><td>左人指１</td><td>fore1_L</td><td>index1.L</td><td>LeftIndexProximal</td><td>leftIndexProximal</td><td>mixamorig:LeftHandIndex1</td></tr>
+<tr><td>左人指２</td><td>fore2_L</td><td>index2.L</td><td>LeftIndexIntermediate</td><td>leftIndexIntermediate</td><td>mixamorig:LeftHandIndex2</td></tr>
+<tr><td>左人指３</td><td>fore3_L</td><td>index3.L</td><td>LeftIndexDistal</td><td>leftIndexDistal</td><td>mixamorig:LeftHandIndex3</td></tr>
+<tr><td>左人指先</td><td>fore tip_L</td><td>index_tip.L</td><td>–</td><td>–</td><td>mixamorig:LeftHandIndex4</td></tr>
+<tr><td>左中指１</td><td>middle1_L</td><td>middle1.L</td><td>LeftMiddleProximal</td><td>leftMiddleProximal</td><td>mixamorig:LeftHandMiddle1</td></tr>
+<tr><td>左中指２</td><td>middle2_L</td><td>middle2.L</td><td>LeftMiddleIntermediate</td><td>leftMiddleIntermediate</td><td>mixamorig:LeftHandMiddle2</td></tr>
+<tr><td>左中指３</td><td>middle3_L</td><td>middle3.L</td><td>LeftMiddleDistal</td><td>leftMiddleDistal</td><td>mixamorig:LeftHandMiddle3</td></tr>
+<tr><td>左中指先</td><td>middle tip_L</td><td>middle_tip.L</td><td>–</td><td>–</td><td>mixamorig:LeftHandMiddle4</td></tr>
+<tr><td>左薬指１</td><td>third1_L</td><td>ring1.L</td><td>LeftRingProximal</td><td>leftRingProximal</td><td>mixamorig:LeftHandRing1</td></tr>
+<tr><td>左薬指２</td><td>third2_L</td><td>ring2.L</td><td>LeftRingIntermediate</td><td>leftRingIntermediate</td><td>mixamorig:LeftHandRing2</td></tr>
+<tr><td>左薬指３</td><td>third3_L</td><td>ring3.L</td><td>LeftRingDistal</td><td>leftRingDistal</td><td>mixamorig:LeftHandRing3</td></tr>
+<tr><td>左薬指先</td><td>third tip_L</td><td>ring_tip.L</td><td>–</td><td>–</td><td>mixamorig:LeftHandRing4</td></tr>
+<tr><td>左小指１</td><td>little1_L</td><td>little1.L</td><td>LeftLittleProximal</td><td>leftLittleProximal</td><td>mixamorig:LeftHandPinky1</td></tr>
+<tr><td>左小指２</td><td>little2_L</td><td>little2.L</td><td>LeftLittleIntermediate</td><td>leftLittleIntermediate</td><td>mixamorig:LeftHandPinky2</td></tr>
+<tr><td>左小指３</td><td>little3_L</td><td>little3.L</td><td>LeftLittleDistal</td><td>leftLittleDistal</td><td>mixamorig:LeftHandPinky3</td></tr>
+<tr><td>左小指先</td><td>little tip_L</td><td>little_tip.L</td><td>–</td><td>–</td><td>mixamorig:LeftHandPinky4</td></tr>
+<tr><td>左足</td><td>leg_L</td><td>leg.L</td><td>LeftUpperLeg</td><td>leftUpperLeg</td><td>mixamorig:LeftUpLeg</td></tr>
+<tr><td>左ひざ</td><td>knee_L</td><td>knee.L</td><td>LeftLowerLeg</td><td>leftLowerLeg</td><td>mixamorig:LeftLeg</td></tr>
+<tr><td>左足首</td><td>ankle_L</td><td>ankle.L</td><td>LeftFoot</td><td>leftFoot</td><td>mixamorig:LeftFoot</td></tr>
+<tr><td>左つま先</td><td>toe_L</td><td>toe.L</td><td>–</td><td>–</td><td>mixamorig:LeftToe_End</td></tr>
+<tr><td>左足IK親</td><td>leg IK parent_L</td><td>leg_IK_parent.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左足ＩＫ</td><td>leg IK_L</td><td>leg_IK.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左つま先ＩＫ</td><td>toe IK_L</td><td>toe_IK.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左足D</td><td>leg D_L</td><td>leg_D.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左ひざD</td><td>knee D_L</td><td>knee_D.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左足首D</td><td>ankle D_L</td><td>ankle_D.L</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>左足先EX</td><td>toe EX_L</td><td>toe_EX.L</td><td>LeftToes</td><td>leftToes</td><td>mixamorig:LeftToeBase</td></tr></tbody></table></div>
+<footer>MMD Bone Tools 1.0.0 · MIT · <a href="https://github.com/QIangIQ/MMD-bone-SDK">GitHub</a> · <a href="https://github.com/QIangIQ/MMD-bone-SDK/issues">Issues</a></footer>
+</main>
+</body>
+</html>

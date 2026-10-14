@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "MMD Bone Tools"
+abstract: "Translate Japanese MMD bone names to English, map bones between MMD, Blender, Unity Humanoid, VRM and Mixamo, and retarget VMD motions."
+authors:
+  - alias: QIangIQ
+version: 1.0.0
+date-released: 2026-10-14
+license: MIT
+repository-code: "https://github.com/QIangIQ/MMD-bone-SDK"
+url: "https://qiangiq.github.io/MMD-bone-SDK/"
+keywords:
+  - MMD
+  - MikuMikuDance
+  - PMX
+  - VMD
+  - bone names
+  - retargeting
+  - Blender
+  - Unity
+  - VRM
+  - Mixamo

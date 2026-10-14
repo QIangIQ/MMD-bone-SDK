@@ -8,27 +8,18 @@ import json
 import sys
 from pathlib import Path
 
-from . import __version__, archive, ops
+from . import __version__, archive, jobs, ops
 from . import dictionary as d
 from .binio import FormatError
-from .model import load_model, save_model
-from .vmd import load_vmd, save_vmd
-
-MODEL_EXT = {".pmx", ".pmd"}
-MOTION_EXT = {".vmd"}
+from .model import load_model
+from .vmd import load_vmd
 
 
 def _kind(path: Path) -> str:
-    ext = path.suffix.lower()
-    if ext in MODEL_EXT:
-        return "model"
-    if ext in MOTION_EXT:
-        return "motion"
-    raise SystemExit(f"unsupported file type: {path} (expected .pmx, .pmd or .vmd)")
-
-
-def _default_out(path: Path, tag: str) -> Path:
-    return path.with_name(f"{path.stem}_{tag}{path.suffix}")
+    try:
+        return jobs.kind(path)
+    except ValueError as e:
+        raise SystemExit(str(e)) from None
 
 
 def _custom(args) -> dict[str, str]:
@@ -43,21 +34,7 @@ def _print_report(rep: ops.Report, args, out=None) -> None:
         return
     if out:
         print(f"wrote {out}")
-    print(f"  renamed: {len(rep.renamed)}")
-    if getattr(args, "verbose", False):
-        for sec, old, new in rep.renamed:
-            print(f"    [{sec}] {old} -> {new}")
-    for sec, old, best in rep.untranslated:
-        print(f"  untranslated [{sec}] {old} (best effort: {best})")
-    for sec, name in rep.too_long:
-        print(f"  warning: [{sec}] '{name}' is longer than VMD's 15-byte name limit")
-    if rep.unmatched:
-        print(f"  motion tracks with no bone in the model ({len(rep.unmatched)}): "
-              + ", ".join(rep.unmatched))
-    if rep.missing:
-        print("  model bones the motion does not drive: " + ", ".join(rep.missing))
-    for n in rep.notes:
-        print(f"  note: {n}")
+    print("\n".join(jobs.report_lines(rep, getattr(args, "verbose", False))))
 
 
 def cmd_info(args) -> int:
@@ -105,47 +82,25 @@ def cmd_info(args) -> int:
 
 
 def cmd_translate(args) -> int:
-    p = Path(args.input)
-    out = Path(args.output) if args.output else _default_out(p, "en")
-    custom = _custom(args)
-    if _kind(p) == "model":
-        m = load_model(p)
-        rep = ops.translate_model(m, args.style, rename=args.rename, overwrite=args.overwrite,
-                                  custom=custom)
-        save_model(m, out)
-    else:
-        mo = load_vmd(p)
-        rep = ops.translate_motion(mo, args.style, custom=custom)
-        save_vmd(mo, out)
+    _kind(Path(args.input))
+    out, rep = jobs.translate_file(args.input, args.output, style=args.style, rename=args.rename,
+                                   overwrite=args.overwrite, custom=_custom(args))
     _print_report(rep, args, out)
     return 0
 
 
 def cmd_convert(args) -> int:
-    p = Path(args.input)
-    out = Path(args.output) if args.output else _default_out(p, args.to)
-    custom = _custom(args)
-    if _kind(p) == "model":
-        m = load_model(p)
-        rep = ops.convert_model(m, args.to, args.source, custom=custom)
-        save_model(m, out)
-    else:
-        mo = load_vmd(p)
-        rep = ops.convert_motion(mo, args.to, args.source, custom=custom)
-        save_vmd(mo, out)
+    _kind(Path(args.input))
+    out, rep = jobs.convert_file(args.input, args.to, args.output, source=args.source,
+                                 custom=_custom(args))
     _print_report(rep, args, out)
     return 0
 
 
 def cmd_retarget(args) -> int:
-    p = Path(args.motion)
-    out = Path(args.output) if args.output else _default_out(p, Path(args.model).stem)
-    mo = load_vmd(p)
-    target = load_model(args.model)
-    source = load_model(args.source_model) if args.source_model else None
-    rep = ops.retarget(mo, target, source, scale=args.scale, keep_unmatched=args.keep_unmatched,
-                       custom=_custom(args))
-    save_vmd(mo, out)
+    out, rep = jobs.retarget_file(args.motion, args.model, args.output,
+                                  source_model=args.source_model, scale=args.scale,
+                                  keep_unmatched=args.keep_unmatched, custom=_custom(args))
     _print_report(rep, args, out)
     return 0
 
@@ -209,40 +164,29 @@ def cmd_batch(args) -> int:
     src = Path(args.folder)
     dst = Path(args.output) if args.output else src.with_name(src.name + "_en")
     custom = _custom(args)
-    work = src
-    zips = sorted(src.rglob("*.zip"))
-    if zips and args.unpack:
-        work = dst / "_unpacked"
-        for z in zips:
-            archive.extract(z, work / z.relative_to(src).with_suffix(""))
-    roots = [src] + ([work] if work != src else [])
+    unpack_dir = dst / "_unpacked" if args.unpack else None
     count = errors = 0
-    for root in roots:
-        for p in sorted(root.rglob("*")):
-            if p.suffix.lower() not in MODEL_EXT | MOTION_EXT or not p.is_file():
-                continue
-            if root == src and dst in p.parents:
-                continue
-            rel = p.relative_to(root)
-            out = dst / rel if root == src else p
-            out.parent.mkdir(parents=True, exist_ok=True)
-            try:
-                if p.suffix.lower() in MODEL_EXT:
-                    m = load_model(p)
-                    rep = ops.translate_model(m, args.style, rename=args.rename, custom=custom)
-                    save_model(m, out)
-                else:
-                    mo = load_vmd(p)
-                    rep = ops.translate_motion(mo, args.style, custom=custom)
-                    save_vmd(mo, out)
-                count += 1
-                if not args.quiet:
-                    print(f"{rel}: {len(rep.renamed)} renamed, {len(rep.untranslated)} untranslated")
-            except (FormatError, OSError) as e:
-                errors += 1
-                print(f"{rel}: skipped ({e})", file=sys.stderr)
+    for f, rel in jobs.collect([src], unpack_dir):
+        if dst in f.parents and (unpack_dir is None or unpack_dir not in f.parents):
+            continue
+        out = dst / rel if unpack_dir is None or unpack_dir not in f.parents else f
+        out.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            _, rep = jobs.translate_file(f, out, style=args.style, rename=args.rename,
+                                         custom=custom)
+            count += 1
+            if not args.quiet:
+                print(f"{rel}: {len(rep.renamed)} renamed, {len(rep.untranslated)} untranslated")
+        except (FormatError, OSError) as e:
+            errors += 1
+            print(f"{rel}: skipped ({e})", file=sys.stderr)
     print(f"processed {count} files into {dst}" + (f", {errors} skipped" if errors else ""))
     return 1 if errors and not count else 0
+
+
+def cmd_gui(args) -> int:
+    from .gui import main as gui_main
+    return gui_main(args.paths)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -329,10 +273,29 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("-q", "--quiet", action="store_true")
     common(p, report=False)
     p.set_defaults(fn=cmd_batch)
+
+    p = sub.add_parser("gui", help="open the desktop app")
+    p.add_argument("paths", nargs="*", help="files or folders to load")
+    p.set_defaults(fn=cmd_gui)
     return ap
 
 
+def _utf8_streams() -> None:
+    # Bone names are Japanese; a Windows pipe or console defaulting to cp1252 would crash.
+    for stream in (sys.stdout, sys.stderr):
+        if stream is None or not hasattr(stream, "reconfigure"):
+            continue
+        try:
+            if stream.isatty():
+                stream.reconfigure(errors="replace")
+            else:
+                stream.reconfigure(encoding="utf-8")
+        except (OSError, ValueError):
+            pass
+
+
 def main(argv=None) -> int:
+    _utf8_streams()
     args = build_parser().parse_args(argv)
     try:
         return args.fn(args)
