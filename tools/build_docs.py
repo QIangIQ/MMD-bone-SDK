@@ -23,6 +23,7 @@ REPO = "https://github.com/QIangIQ/MMD-bone-SDK"
 RELEASE = REPO + "/releases/latest"
 DATE = "2026-10-14"
 # IndexNow key (Bing, Yandex, Seznam, Naver); public by design, served as /<key>.txt
+GOOGLE_VERIFICATION = "Sj1mV7QguTd3istzGFcox8vaVni9Dch-5WrXLOXPN-Q"
 INDEXNOW_KEY = "d38a1839f6041a66cbbb09c1f5e49a3a"
 
 TEXT = {
@@ -234,6 +235,7 @@ def page(key: str) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="{GOOGLE_VERIFICATION}">
 <title>{html.escape(t['title'])}</title>
 <meta name="description" content="{html.escape(t['desc'])}">
 <meta name="keywords" content="MMD, MikuMikuDance, PMX, PMD, VMD, bone, ボーン名, 英語化, 翻訳, retarget, リターゲット, Blender, Unity, VRM, VRChat, Mixamo">
