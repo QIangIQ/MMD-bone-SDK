@@ -22,6 +22,8 @@ SITE = "https://qiangiq.github.io/MMD-bone-SDK/"
 REPO = "https://github.com/QIangIQ/MMD-bone-SDK"
 RELEASE = REPO + "/releases/latest"
 DATE = "2026-10-14"
+# IndexNow key (Bing, Yandex, Seznam, Naver); public by design, served as /<key>.txt
+INDEXNOW_KEY = "d38a1839f6041a66cbbb09c1f5e49a3a"
 
 TEXT = {
     "en": {
@@ -302,6 +304,7 @@ def outputs() -> dict[str, str]:
         "sitemap.xml": sitemap,
         "robots.txt": f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n",
         ".nojekyll": "",
+        f"{INDEXNOW_KEY}.txt": INDEXNOW_KEY,
     }
 
 
