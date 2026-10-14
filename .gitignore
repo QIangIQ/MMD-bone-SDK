@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+# keep downloaded models and motions out of the repo
+*.pmx
+*.pmd
+*.vmd
+*.zip
+!tests/fixtures/**

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mmd-bone-tools"
+version = "0.1.0"
+description = "Translate, map and retarget MMD bones (PMX, PMD, VMD) between Japanese, English, Blender, Unity, VRM and Mixamo naming"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.5"]
+
+[project.scripts]
+mmdbt = "mmd_bone_tools.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = ["E731", "B905"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/mmd_bone_tools/dictionary.py" = ["E501"]
+"tests/builders.py" = ["E501"]
